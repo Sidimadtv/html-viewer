@@ -1,21 +1,64 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>GitHub HTML Preview</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub &amp; BitBucket HTML Preview</title>
     <style>
-        body { font: 12px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; text-align: center; padding: 50px; }
-        #previewform { display: block; border: 1px solid #ddd; padding: 20px; border-radius: 8px; }
-        input[type="url"] { padding: 8px; width: 300px; }
-        input[type="submit"] { padding: 8px 15px; cursor: pointer; }
+        body {
+            font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #333;
+            background-color: #f6f8fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #previewform {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 { font-size: 24px; margin-bottom: 20px; }
+        input[type="url"] {
+            width: 80%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #2ea44f;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        input[type="submit"]:hover { background-color: #2c974b; }
+        code { background: #eee; padding: 2px 4px; border-radius: 3px; }
     </style>
 </head>
 <body>
- <form id="previewform" onsubmit="location.href='./?'+this.file.value;return false">
-    <h1>GitHub HTML Preview</h1>
-    <input type="url" id="file" placeholder="Paste GitHub HTML URL here" required>
-    <input type="submit" value="Preview">
-</form>
+
+    <form id="previewform" onsubmit="window.location.href='./index.html?'+document.getElementById('file').value; return false;">
+        <h1>GitHub HTML Preview</h1>
+        <p>Enter the URL of a GitHub HTML file to preview it:</p>
+        <input type="url" id="file" placeholder="https://github.com/user/repo/blob/main/index.html" required autofocus>
+        <br>
+        <input type="submit" value="Preview">
+        
+        <p style="margin-top: 20px; font-size: 11px; color: #666;">
+            Example: <code>https://github.com/vismodo/htmlpreviewer/blob/main/index.html</code>
+        </p>
+    </form>
+
     <script src="preview.js"></script>
 </body>
 </html>
