@@ -10,7 +10,7 @@
     function renderHistory() {
         const history = getHistory();
         historyDiv.innerHTML = '';
-        history.forEach(url => {
+        history.reverse().forEach(url => {
             const span = document.createElement('span');
             span.className = 'tag';
             span.innerText = url.split('/').pop() || url;
@@ -34,23 +34,30 @@
         // Convert GitHub URL to Raw URL
         const rawUrl = url.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
 
-        // Fetch via Proxy and inject ONLY into the iframe
+        // Create a new tab to act as the viewer
+        const newTab = window.open('', '_blank');
+        newTab.document.write('<html><body>Loading Preview...</body></html>');
+
         fetch('https://api.codetabs.com/v1/proxy/?quest=' + rawUrl)
             .then(r => r.text())
             .then(html => {
                 const base = `<base href="${rawUrl}">`;
                 const finalHtml = html.replace(/<head([^>]*)>/i, `<head$1>${base}`);
                 
-                const dest = viewer.contentWindow.document;
-                dest.open();
-                dest.write(finalHtml);
-                dest.close();
+                // Injecting into the new tab instead of the hidden iframe
+                newTab.document.open();
+                newTab.document.write(finalHtml);
+                newTab.document.close();
             })
-            .catch(e => alert("Error: " + e.message));
+            .catch(e => {
+                newTab.close();
+                alert("Error: " + e.message);
+            });
     };
 
     window.exportHistory = function() {
-        const blob = new Blob([localStorage.getItem('gh_history') || '[]'], {type: 'application/json'});
+        const data = localStorage.getItem('gh_history') || '[]';
+        const blob = new Blob([data], {type: 'application/json'});
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
         a.download = 'my_history.json';
@@ -67,9 +74,11 @@
     };
 
     window.clearAll = function() {
-        localStorage.removeItem('gh_history');
-        renderHistory();
-        viewer.src = "about:blank";
+        if(confirm("Clear everything?")) {
+            localStorage.removeItem('gh_history');
+            renderHistory();
+            viewer.src = "about:blank";
+        }
     };
 
     renderHistory();
