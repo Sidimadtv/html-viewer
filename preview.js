@@ -1,39 +1,40 @@
 (function() {
-    const urlInput = document.getElementById('github-url');
+    const urlInput = document.getElementById('gh-url');
     const historyDiv = document.getElementById('history');
     const viewer = document.getElementById('viewer');
 
-    // 1. Load history from LocalStorage immediately
-    function loadHistory() {
-        const saved = JSON.parse(localStorage.getItem('gh_history') || '[]');
+    function getHistory() {
+        return JSON.parse(localStorage.getItem('gh_history') || '[]');
+    }
+
+    function renderHistory() {
+        const history = getHistory();
         historyDiv.innerHTML = '';
-        saved.forEach(url => {
+        history.forEach(url => {
             const span = document.createElement('span');
             span.className = 'tag';
-            span.innerText = url.split('/').pop(); // Just the file name
+            span.innerText = url.split('/').pop() || url;
             span.onclick = () => { urlInput.value = url; runPreview(); };
             historyDiv.appendChild(span);
         });
-        return saved;
     }
 
-    // 2. The Preview Engine
     window.runPreview = function() {
         const url = urlInput.value.trim();
         if (!url) return;
 
-        // Save to History
-        let history = JSON.parse(localStorage.getItem('gh_history') || '[]');
+        // Save to LocalStorage
+        let history = getHistory();
         if (!history.includes(url)) {
             history.push(url);
             localStorage.setItem('gh_history', JSON.stringify(history));
-            loadHistory();
+            renderHistory();
         }
 
-        // Convert to Raw Link
+        // Convert GitHub URL to Raw URL
         const rawUrl = url.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
 
-        // Fetch and inject into IFRAME (not the main page!)
+        // Fetch via Proxy and inject ONLY into the iframe
         fetch('https://api.codetabs.com/v1/proxy/?quest=' + rawUrl)
             .then(r => r.text())
             .then(html => {
@@ -45,16 +46,14 @@
                 dest.write(finalHtml);
                 dest.close();
             })
-            .catch(e => alert("Failed to load: " + e.message));
+            .catch(e => alert("Error: " + e.message));
     };
 
-    // 3. Export / Import / Clear
     window.exportHistory = function() {
-        const data = localStorage.getItem('gh_history') || '[]';
-        const blob = new Blob([data], {type: 'application/json'});
+        const blob = new Blob([localStorage.getItem('gh_history') || '[]'], {type: 'application/json'});
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'history_backup.json';
+        a.download = 'my_history.json';
         a.click();
     };
 
@@ -62,18 +61,16 @@
         const reader = new FileReader();
         reader.onload = () => {
             localStorage.setItem('gh_history', reader.result);
-            loadHistory();
+            renderHistory();
         };
         reader.readAsText(input.files[0]);
     };
 
     window.clearAll = function() {
-        if(confirm("Delete history?")) {
-            localStorage.removeItem('gh_history');
-            loadHistory();
-            viewer.src = "about:blank"; // Clear the viewer too
-        }
+        localStorage.removeItem('gh_history');
+        renderHistory();
+        viewer.src = "about:blank";
     };
 
-    loadHistory(); // Initialize the list on page load
+    renderHistory();
 })();
