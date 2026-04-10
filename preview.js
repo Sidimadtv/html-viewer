@@ -1,83 +1,79 @@
-(function () {
-    const fileInput = document.getElementById('file');
-    const historyList = document.getElementById('history-list');
-    const frame = document.getElementById('preview-frame');
+(function() {
+    const urlInput = document.getElementById('github-url');
+    const historyDiv = document.getElementById('history');
+    const viewer = document.getElementById('viewer');
 
-    // --- History Logic ---
-    function getHistory() {
-        return JSON.parse(localStorage.getItem('preview_history') || '[]');
-    }
-
-    function renderHistory() {
-        const history = getHistory();
-        historyList.innerHTML = '';
-        history.forEach(url => {
+    // 1. Load history from LocalStorage immediately
+    function loadHistory() {
+        const saved = JSON.parse(localStorage.getItem('gh_history') || '[]');
+        historyDiv.innerHTML = '';
+        saved.forEach(url => {
             const span = document.createElement('span');
-            span.className = 'history-tag';
-            span.innerText = url.split('/').pop(); // Show just filename
-            span.onclick = () => { fileInput.value = url; launchPreview(); };
-            historyList.appendChild(span);
+            span.className = 'tag';
+            span.innerText = url.split('/').pop(); // Just the file name
+            span.onclick = () => { urlInput.value = url; runPreview(); };
+            historyDiv.appendChild(span);
         });
+        return saved;
     }
 
-    // --- Preview Logic ---
-    window.launchPreview = function(customUrl) {
-        const url = customUrl || fileInput.value.trim();
+    // 2. The Preview Engine
+    window.runPreview = function() {
+        const url = urlInput.value.trim();
         if (!url) return;
 
         // Save to History
-        let history = getHistory();
+        let history = JSON.parse(localStorage.getItem('gh_history') || '[]');
         if (!history.includes(url)) {
             history.push(url);
-            localStorage.setItem('preview_history', JSON.stringify(history));
-            renderHistory();
+            localStorage.setItem('gh_history', JSON.stringify(history));
+            loadHistory();
         }
 
-        // Convert to Raw
-        const rawUrl = url.replace(/\/\/github\.com/, '//raw.githubusercontent.com').replace(/\/blob\//, '/');
-        
-        // Show Frame
-        frame.style.display = 'block';
-        
+        // Convert to Raw Link
+        const rawUrl = url.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
+
+        // Fetch and inject into IFRAME (not the main page!)
         fetch('https://api.codetabs.com/v1/proxy/?quest=' + rawUrl)
-            .then(res => res.text())
-            .then(data => {
-                const baseTag = `<base href="${rawUrl}">`;
-                const content = data.replace(/<head([^>]*)>/i, `<head$1>${baseTag}`);
+            .then(r => r.text())
+            .then(html => {
+                const base = `<base href="${rawUrl}">`;
+                const finalHtml = html.replace(/<head([^>]*)>/i, `<head$1>${base}`);
                 
-                const doc = frame.contentWindow.document;
-                doc.open();
-                doc.write(content);
-                doc.close();
+                const dest = viewer.contentWindow.document;
+                dest.open();
+                dest.write(finalHtml);
+                dest.close();
             })
-            .catch(err => alert("Error loading page: " + err.message));
+            .catch(e => alert("Failed to load: " + e.message));
     };
 
-    // --- Export / Import ---
-    window.exportJSON = function() {
-        const blob = new Blob([JSON.stringify(getHistory())], {type: "application/json"});
-        const url = URL.createObjectURL(blob);
+    // 3. Export / Import / Clear
+    window.exportHistory = function() {
+        const data = localStorage.getItem('gh_history') || '[]';
+        const blob = new Blob([data], {type: 'application/json'});
         const a = document.createElement('a');
-        a.href = url;
-        a.download = "history.json";
+        a.href = URL.createObjectURL(blob);
+        a.download = 'history_backup.json';
         a.click();
     };
 
-    window.importJSON = function(input) {
+    window.importHistory = function(input) {
         const reader = new FileReader();
-        reader.onload = function() {
-            localStorage.setItem('preview_history', reader.result);
-            renderHistory();
+        reader.onload = () => {
+            localStorage.setItem('gh_history', reader.result);
+            loadHistory();
         };
         reader.readAsText(input.files[0]);
     };
 
-    window.clearHistory = function() {
-        localStorage.removeItem('preview_history');
-        renderHistory();
-        frame.style.display = 'none';
+    window.clearAll = function() {
+        if(confirm("Delete history?")) {
+            localStorage.removeItem('gh_history');
+            loadHistory();
+            viewer.src = "about:blank"; // Clear the viewer too
+        }
     };
 
-    // Initialize
-    renderHistory();
+    loadHistory(); // Initialize the list on page load
 })();
