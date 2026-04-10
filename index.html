@@ -4,38 +4,29 @@
     <meta charset="utf-8">
     <title>GitHub Preview Pro</title>
     <style>
-        body { font: 14px sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; background: #f6f8fa; }
-        /* Dashboard Area */
-        #dashboard { background: white; padding: 20px; border-bottom: 2px solid #ddd; flex-shrink: 0; text-align: center; }
-        .input-group { margin-bottom: 10px; }
-        input[type="url"] { width: 60%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
-        
-        /* Buttons */
-        .btn { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin: 2px; }
-        .btn-preview { background: #2ea44f; color: white; }
-        .btn-action { background: #0969da; color: white; }
+        body { font: 14px sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; background: #f0f2f5; }
+        #dashboard { background: #fff; padding: 15px; border-bottom: 2px solid #ddd; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .controls { display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; }
+        input[type="url"] { padding: 10px; width: 50%; border: 1px solid #ccc; border-radius: 4px; }
+        .btn { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-go { background: #2ea44f; color: white; }
+        .btn-tool { background: #0969da; color: white; }
         .btn-clear { background: #cf222e; color: white; }
-        
-        /* History Section */
-        #history { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+        #history { margin-top: 10px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
         .tag { background: #e1e4e8; padding: 4px 10px; border-radius: 12px; font-size: 12px; cursor: pointer; }
-        .tag:hover { background: #d1d5da; }
-
-        /* The Preview Area */
-        #viewer { flex-grow: 1; border: none; background: white; width: 100%; }
+        /* The Iframe is the key - it prevents the 'ruining' */
+        #viewer { flex-grow: 1; border: none; width: 100%; background: white; }
     </style>
 </head>
 <body>
 
 <div id="dashboard">
-    <div class="input-group">
-        <input type="url" id="github-url" placeholder="https://github.com/user/repo/blob/main/index.html">
-        <button class="btn btn-preview" onclick="runPreview()">Preview</button>
-    </div>
-    <div>
-        <button class="btn btn-action" onclick="exportHistory()">Export JSON</button>
-        <button class="btn btn-action" onclick="document.getElementById('importFile').click()">Import JSON</button>
-        <button class="btn btn-clear" onclick="clearAll()">Clear All</button>
+    <div class="controls">
+        <input type="url" id="gh-url" placeholder="https://github.com/user/repo/blob/main/index.html">
+        <button class="btn btn-go" onclick="runPreview()">Preview</button>
+        <button class="btn btn-tool" onclick="exportHistory()">Export JSON</button>
+        <button class="btn btn-tool" onclick="document.getElementById('importFile').click()">Import JSON</button>
+        <button class="btn btn-clear" onclick="clearAll()">Clear</button>
         <input type="file" id="importFile" style="display:none" onchange="importHistory(this)">
     </div>
     <div id="history"></div>
