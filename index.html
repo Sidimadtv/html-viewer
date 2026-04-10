@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>GitHub HTML Preview</title>
+    <style>
+        body { font: 12px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; text-align: center; padding: 50px; }
+        #previewform { display: block; border: 1px solid #ddd; padding: 20px; border-radius: 8px; }
+        input[type="url"] { padding: 8px; width: 300px; }
+        input[type="submit"] { padding: 8px 15px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <form id="previewform" onsubmit="location.href='/?'+this.file.value;return false">
+        <h1>GitHub HTML Preview</h1>
+        <p>Enter GitHub HTML URL:</p>
+        <input type="url" id="file" placeholder="https://github.com/user/repo/blob/main/index.html" required>
+        <input type="submit" value="Preview">
+    </form>
+    <script src="preview.js"></script>
+</body>
+</html>
