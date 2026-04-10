@@ -11,12 +11,11 @@
     </style>
 </head>
 <body>
-    <form id="previewform" onsubmit="location.href='/?'+this.file.value;return false">
-        <h1>GitHub HTML Preview</h1>
-        <p>Enter GitHub HTML URL:</p>
-        <input type="url" id="file" placeholder="https://github.com/user/repo/blob/main/index.html" required>
-        <input type="submit" value="Preview">
-    </form>
+ <form id="previewform" onsubmit="location.href='./?'+this.file.value;return false">
+    <h1>GitHub HTML Preview</h1>
+    <input type="url" id="file" placeholder="Paste GitHub HTML URL here" required>
+    <input type="submit" value="Preview">
+</form>
     <script src="preview.js"></script>
 </body>
 </html>
