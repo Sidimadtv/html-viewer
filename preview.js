@@ -1,20 +1,21 @@
 (function () {
     var previewForm = document.getElementById('previewform');
-    var query = location.search.substring(1); 
+    // Get everything after the '?'
+    var query = window.location.search.substring(1); 
     
-    // Convert GitHub URL to Raw URL
-    var rawUrl = query.replace(/\/\/github\.com/, '//raw.githubusercontent.com')
-                      .replace(/\/blob\//, '/');
-
     if (query) {
-        // Use the CodeTabs proxy to bypass CORS
+        // 1. Clean the URL and convert to Raw GitHub link
+        var rawUrl = query.replace(/\/\/github\.com/, '//raw.githubusercontent.com')
+                          .replace(/\/blob\//, '/');
+
+        // 2. Fetch the content through the proxy
         fetch('https://api.codetabs.com/v1/proxy/?quest=' + rawUrl)
             .then(res => {
-                if (!res.ok) throw new Error('Target file not found (404)');
+                if (!res.ok) throw new Error('File not found (404)');
                 return res.text();
             })
             .then(data => {
-                // Replace relative paths so images/css load
+                // 3. Inject a <base> tag so images and CSS load from GitHub
                 data = data.replace(/<head([^>]*)>/i, '<head$1><base href="' + rawUrl + '">');
                 
                 document.open();
@@ -23,9 +24,10 @@
             })
             .catch(err => {
                 previewForm.style.display = 'block';
-                previewForm.innerHTML = '<p style="color:red">Error: ' + err.message + '</p><a href="index.html">Go Back</a>';
+                previewForm.innerHTML = '<h2 style="color:red">Error</h2><p>' + err.message + '</p>';
             });
     } else {
+        // If no URL is provided, show the input form
         previewForm.style.display = 'block';
     }
 })();
