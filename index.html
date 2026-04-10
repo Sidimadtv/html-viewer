@@ -3,61 +3,42 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub &amp; BitBucket HTML Preview</title>
+    <title>GitHub HTML Preview + History</title>
     <style>
-        body {
-            font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            color: #333;
-            background-color: #f6f8fa;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        #previewform {
-            background: white;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 600px;
-            width: 100%;
-        }
-        h1 { font-size: 24px; margin-bottom: 20px; }
-        input[type="url"] {
-            width: 80%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-        input[type="submit"] {
-            padding: 10px 20px;
-            background-color: #2ea44f;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        input[type="submit"]:hover { background-color: #2c974b; }
-        code { background: #eee; padding: 2px 4px; border-radius: 3px; }
+        body { font: 14px sans-serif; background: #f6f8fa; display: flex; flex-direction: column; align-items: center; padding-top: 50px; }
+        #previewform { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 600px; text-align: center; }
+        input[type="url"] { width: 80%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin: 5px; }
+        .btn-primary { background: #2ea44f; color: white; }
+        .btn-danger { background: #cf222e; color: white; }
+        .btn-secondary { background: #0969da; color: white; }
+        #history-section { margin-top: 20px; text-align: left; width: 100%; max-width: 600px; background: white; padding: 20px; border-radius: 8px; }
+        .history-item { padding: 5px 0; border-bottom: 1px solid #eee; word-break: break-all; }
+        .history-item a { color: #0969da; text-decoration: none; font-size: 12px; }
     </style>
 </head>
 <body>
 
-    <form id="previewform" onsubmit="window.location.href='./index.html?'+document.getElementById('file').value; return false;">
+    <div id="previewform">
         <h1>GitHub HTML Preview</h1>
-        <p>Enter the URL of a GitHub HTML file to preview it:</p>
-        <input type="url" id="file" placeholder="https://github.com/user/repo/blob/main/index.html" required autofocus>
-        <br>
-        <input type="submit" value="Preview">
+        <form onsubmit="saveAndGo(); return false;">
+            <input type="url" id="file" placeholder="https://github.com/user/repo/blob/main/index.html" required>
+            <br>
+            <button type="submit" class="btn btn-primary">Preview</button>
+        </form>
         
-        <p style="margin-top: 20px; font-size: 11px; color: #666;">
-            Example: <code>https://github.com/vismodo/htmlpreviewer/blob/main/index.html</code>
-        </p>
-    </form>
+        <div style="margin-top: 20px;">
+            <button class="btn btn-secondary" onclick="exportJSON()">Export JSON</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">Import JSON</button>
+            <button class="btn btn-danger" onclick="clearHistory()">Clear History</button>
+            <input type="file" id="importFile" style="display:none" onchange="importJSON(this)">
+        </div>
+    </div>
+
+    <div id="history-section">
+        <h3>Recent History</h3>
+        <div id="history-list"></div>
+    </div>
 
     <script src="preview.js"></script>
 </body>
